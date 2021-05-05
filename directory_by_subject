@@ -1,0 +1,325 @@
+/*Libguides directory by Stacey Knight-Davis*/
+
+//add styles to the head of your document or add them as a separate file
+
+<style type="text/css">
+
+div#linklist ul {
+list-style-image: none;
+list-style-type: none;
+margin-left: 2em;}
+
+
+.indent {padding-left: 2em}
+
+	
+	.directoryname {
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.darkgrey {
+	background-color: #dedede;
+		height: 110px;
+}
+
+.lightgrey{
+	background-color: #eeeeee;
+	height: 110px;
+}
+
+	.shortinfo {
+	margin-left: 5px;
+	padding: 30px 20px;
+	display: block;
+	float: left;	
+	margin-top: 5px;
+	
+}
+
+ 
+ .inline li {
+    float: left;
+	margin-bottom: 10px;
+}
+
+ .inline a {
+    display: block;
+    width: 200px;
+}
+
+.inline  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+} 
+    .noborder {border-style: none;}
+	
+	.directorylisting{
+		font-size: 13px;
+		color: #2c2c2c;
+		line-height: 17px;
+}
+
+.directorylisting img {
+	float: left;
+	display: block;
+	margin-top: 5px;
+
+}
+</style>
+
+
+ <div class="directorylisting">	 
+        <table class="noborder" align="center">
+
+
+<?php
+
+//uncomment line below for full error reporting
+
+//ini_set('error_reporting', E_ALL);
+
+
+
+//change information in ALL CAPS to your site ID and Key
+
+//list of subjects
+
+$test_api_url2="https://lgapi-us.libapps.com/1.1/subjects?site_id=SITE_ID&key=KEY";
+
+//librarians with subjects
+
+$test_api_url3="https://lgapi-us.libapps.com/1.1/accounts?site_id=SITE_ID&key=KEY&expand=subjects";
+
+//librarian profiles
+
+$test_api_url="https://lgapi-us.libapps.com/1.1/accounts?site_id=SITE_ID&key=KEY&expand=profile";
+	
+
+global $test_api_url;
+		$curl = curl_init();
+	curl_setopt_array($curl, array(
+		CURLOPT_URL => $test_api_url,
+		CURLOPT_SSL_VERIFYPEER => false,
+		CURLOPT_RETURNTRANSFER => true
+	));
+	$response = curl_exec($curl);
+	if(!$response){die("Connection Failure");}
+   curl_close($curl);
+   $array = json_decode($response, true);
+
+
+   
+ $profile_last_names = array_column($array, 'last_name');
+
+array_multisort($profile_last_names, SORT_ASC, $array);
+
+   global $test_api_url2;
+		$curl2 = curl_init();
+	curl_setopt_array($curl2, array(
+		CURLOPT_URL => $test_api_url2,
+		CURLOPT_SSL_VERIFYPEER => false,
+		CURLOPT_RETURNTRANSFER => true
+	));
+	$response2 = curl_exec($curl2);
+	if(!$response2){die("Connection Failure");}
+   curl_close($curl2);
+
+//var_dump($array);   
+  
+    $array2 = json_decode($response2, true);  
+
+
+ $subjects = array_column($array2, 'subjects');
+
+array_multisort($subjects, SORT_ASC, $array2);
+
+
+global $test_api_url3;
+		$curl3 = curl_init();
+	curl_setopt_array($curl3, array(
+		CURLOPT_URL => $test_api_url3,
+		CURLOPT_SSL_VERIFYPEER => false,
+		CURLOPT_RETURNTRANSFER => true
+	));
+	$response3 = curl_exec($curl3);
+	if(!$response3){die("Connection Failure");}
+   curl_close($curl3);
+   
+  
+    $array3 = json_decode($response3, true); 
+
+
+
+
+
+
+
+//counter for shading
+
+   $i=0;
+
+
+
+ foreach($array2 as $key2 => $value2) 
+ 
+ {
+	  # Increment our row counter
+	 
+		 
+		$i++; 
+		
+   
+	echo "<tr>
+	
+	<td style=\"background-color:";
+		
+    //set colors below 
+    
+		 if ($i % 2 == 0 ){echo "#dedede;";}
+	else {echo "#eeeeee;";} 
+	 
+	 echo "\"><div style=\"width:450px;height:auto;\" class=\"";
+
+    
+	if ($i % 2 == 0 ){echo "darkgrey";}
+	else {echo "lightgrey";}
+	
+	echo " shortinfo\"> <p style=\"margin-top:-10px;line-height:1.2;\">";
+	 
+		
+	//set MYLIB to your libguides domain
+		
+		echo "<a href=\"https://MYLIB.libguides.com/az.php?s=" . $value2['id'] . "\">" . $value2['name'] . "</a>";
+		echo "<br />";
+		
+		
+	
+	echo "</p></div></td>";
+		 
+		 
+		 
+		 
+		 
+		echo "<td style=\"background-color:";
+		
+		 if ($i % 2 == 0 ){echo "#dedede;";}
+	else {echo "#eeeeee;";} 
+	 
+	 echo "\"><div style=\"width:450px;height:auto;\" class=\"";
+
+    
+	if ($i % 2 == 0 ){echo "darkgrey";}
+	else {echo "lightgrey";}
+	
+	echo " shortinfo\">";
+	 
+	  	$j=0;
+	
+		$subid=$value2['id'];
+		
+
+	 	 foreach ($array3 as $key3 => $value3)
+	{	
+			foreach ($value3['subjects'] as $subkey => $subject) 
+			{
+				if($subid==$subject['id']) 
+				
+				{  
+        //photos are stored outside of libguides so you can size them consistantly. Each photo must have the last name as the file name. Add _thmb to thumbnails. Use JPG or change the extension below. All extensions must be the same.
+					
+					echo "<img src=\"https://mylibrary.org/photos". $value3["last_name"] .  "_thmb.jpg\" alt=\"" .
+    
+ 				 $value3["first_name"] . " " . $value3["last_name"] . "\" ";
+   				 echo "style=\"margin-right:10px;\">";
+					 
+					
+			
+					 
+					 echo "				<div style=\"margin-left: 150px;";
+					 
+           //checks for multiple librarians per subject. If more than 1, adds a border to the top of the listing.
+           
+					 if ($j>0)
+				{echo "border-top-style:solid;padding-top:10px;";}
+					 
+					echo "\" ><span class=\"directoryname\">";
+
+		 		echo $value3["first_name"] . " " . $value3["last_name"] . "</span><p style=\"Margin-bottom:30px;line-height:1.2;";
+				
+				
+				echo "\"> ";
+
+				 echo "<a href=\"mailto:" . $value3["email"] . "\">" . $value3["email"] ."</a><br />";
+		 
+	
+		
+				echo  "<br/>";
+    
+				
+		 
+				foreach ($array as $key => $value)
+					
+		 			{ if ($value3["email"]==$value["email"])
+						
+					
+					{if(strlen( $value['title'])>0)
+						{
+		 				echo $value['title'];
+					 	echo  "<br/>";}
+		
+			 
+		
+			if(strlen( $value['profile']['connect']['phone'])>0)
+						{	 				
+				echo $value['profile']['connect']['phone'];}
+					 else {echo "<br/>";}
+		 
+		  			echo  "<br/>";
+		 			
+					 if(strlen( $value['profile']['connect']['address'])>0)
+						{
+						echo($value['profile']['connect']['address']);
+						echo  "<br/>";}
+					
+					 if(strlen( $value['profile']['connect']['website'])>0)
+					 	{
+					 	echo "<a href=\"" . $value['profile']['connect']['website'] . "\">Selected Works</a><br/>";
+			 			}
+		 
+		  			if(strlen( $value['profile']['widget_lc'])>0)
+						{
+						$appointment = $value['profile']['widget_lc'];
+						 
+			 			//look for a 5 digit number
+			  
+			  			preg_match('/[0-9]{5}/', substr($appointment,5), $matches, PREG_OFFSET_CAPTURE);
+			  
+						 $uid=$matches[0][0];
+			  
+			  echo "<br /><a href=\"https://eiu.libcal.com/appointment/" . $uid . "\">Make an Appointment</a>";
+						}
+				$j++;
+					 echo "</p>";echo"</div>";
+					
+					}
+			 
+	
+		
+		 			}
+			
+				 }
+				
+	 }
+
+		 }
+
+ echo "</div></td></tr>";
+ }
+echo "</table>";
+    
+
+
+
+?>
